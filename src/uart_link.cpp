@@ -170,7 +170,18 @@ void handlePacket(const Packet &packet) {
       return;
     }
 
-    startAzimuthMove(targetAngle);
+    if (packet.length >= 3) {
+      const uint8_t dir = packet.payload[2];
+      if (dir == 1) {
+        startAzimuthMoveForced(targetAngle, CW);
+      } else if (dir == 2) {
+        startAzimuthMoveForced(targetAngle, CCW);
+      } else {
+        startAzimuthMove(targetAngle);
+      }
+    } else {
+      startAzimuthMove(targetAngle);
+    }
     Serial.print("[UART] RX goto target=");
     Serial.println(getTargetAzimuthDegrees());
     sendAck(PACKET_GOTO_AZIMUTH);

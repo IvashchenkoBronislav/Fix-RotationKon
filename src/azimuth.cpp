@@ -374,3 +374,14 @@ void azimuthUpdate() {
 
   saveAzimuthIfNeeded(getMotorState() == STOP);
 }
+
+void startAzimuthMoveForced(int targetDegrees, MotorState direction) {
+  const int startHalf = realAzimuthHalfDegrees;
+  const int targetHalf = degreesToHalfDegrees(targetDegrees);
+
+  const int cw = (normalizeAzimuthHalf(targetHalf) - normalizeAzimuthHalf(startHalf) + 720) % 720;
+  const int ccw = (normalizeAzimuthHalf(startHalf) - normalizeAzimuthHalf(targetHalf) + 720) % 720;
+
+  const uint32_t requiredPulses = static_cast<uint32_t>(direction == CW ? cw : ccw);
+  startPulseBudgetMove(requiredPulses, direction, targetDegrees, "FORCED");
+}

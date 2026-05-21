@@ -74,7 +74,7 @@ constexpr uint32_t AZIMUTH_MOVE_TIMEOUT_MARGIN_MS = 400;
 constexpr uint32_t AZIMUTH_STOP_LEAD_PULSES = 0;
 // false: use direct target-current difference and do not wrap across 0/360.
 // true: use the shortest path and allow movement across 0/360.
-constexpr bool AZIMUTH_ALLOW_ZERO_CROSSING = false;
+constexpr bool AZIMUTH_ALLOW_ZERO_CROSSING = true;
 // Reserved repeat interval for target adjustment controls.
 constexpr uint32_t TARGET_ADJUST_REPEAT_MS = 180;
 // Debounce time for pulse input edges.
