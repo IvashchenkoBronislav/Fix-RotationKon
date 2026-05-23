@@ -18,7 +18,9 @@ void setup() {
   Serial.println();
   Serial.println("Rotor controller");
   Serial.print("DEVICE_ID: ");
-  Serial.println(DEVICE_ID);
+  Serial.print(DEVICE_ID);
+  Serial.print(" Version: ");
+  Serial.println(VER);
   Serial.println("Starting...");
   Serial.println("Init: motor");
 

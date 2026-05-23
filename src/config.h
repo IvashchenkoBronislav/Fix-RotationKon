@@ -5,7 +5,7 @@
 // Serial number of this physical rotation unit.
 // Keep this value aligned with RotationKonWT DEVICE_ID for the same device.
 constexpr const char *DEVICE_ID = "r1p-005";
-
+constexpr const char *VER = "0.1";
 // Relay GPIO pins on the main controller.
 // K1 is the CW direction relay.
 constexpr uint8_t PIN_RELAY_K1 = 5;
