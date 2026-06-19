@@ -1,5 +1,6 @@
 #pragma once
 #include "motor.h"
+
 void azimuthInit();
 void azimuthUpdate();
 int getAzimuthDegrees();

@@ -23,6 +23,7 @@ ButtonState buttonCCW = {PIN_BUTTON_CCW, HIGH, HIGH, 0};
 ButtonState buttonStop = {PIN_BUTTON_STOP, HIGH, HIGH, 0};
 ButtonMode currentButtonMode = BUTTON_IDLE;
 bool stopPending = false;
+uint32_t stopPendingSinceMs = 0;
 }
 
 static bool isPressed(const ButtonState &button) {
@@ -87,6 +88,9 @@ static void applyButtonUiRefresh() {
 
 static void requestSafeStop() {
   if (isPulseContactClosed()) {
+    if (!stopPending) {
+      stopPendingSinceMs = millis();
+    }
     stopPending = true;
     return;
   }
@@ -193,9 +197,18 @@ void updateButtons() {
     applyButtonUiRefresh();
   }
 
-  if (stopPending && !isPulseContactClosed()) {
+  if (stopPending &&
+      (!isPulseContactClosed() || (millis() - stopPendingSinceMs) >= STOP_PENDING_MAX_WAIT_MS)) {
     stopPending = false;
     setStop();
+    refreshStatusAndDisplay();
+  }
+
+  const MotorState motorState = getMotorState();
+  if (!isAzimuthMoveActive() &&
+      ((motorState == CW && !isPressed(buttonCW)) ||
+       (motorState == CCW && !isPressed(buttonCCW)))) {
+    requestSafeStop();
     refreshStatusAndDisplay();
   }
 }

@@ -4,7 +4,7 @@
 
 // Serial number of this physical rotation unit.
 // Keep this value aligned with RotationKonWT DEVICE_ID for the same device.
-constexpr const char *DEVICE_ID = "r1p-005";
+constexpr const char *DEVICE_ID = "r1p-004";
 constexpr const char *VER = "0.1";
 // Relay GPIO pins on the main controller.
 // K1 is the CW direction relay.
@@ -53,6 +53,10 @@ constexpr uint32_t DIRECTION_CHANGE_DELAY_MS = 250;
 constexpr uint32_t RELAY_K3_STOP_LEAD_MS = 160;
 // Button debounce time for local manual buttons.
 constexpr uint32_t BUTTON_DEBOUNCE_MS = 50;
+// Maximum time to defer a safe-stop while waiting for the pulse contact to
+// open before forcing the stop anyway (guards against a stuck/frozen contact
+// leaving the motor running indefinitely after a button release).
+constexpr uint32_t STOP_PENDING_MAX_WAIT_MS = 100;
 // Startup logo display time before the live status screen appears.
 constexpr uint32_t OLED_SPLASH_DELAY_MS = 1200;
 // Minimum interval between OLED redraws while the display is awake.
@@ -66,7 +70,7 @@ constexpr uint32_t AZIMUTH_AUTO_START_DELAY_MS = 2000;
 // Grace period after auto-move start before pulse-loss can stop the move.
 constexpr uint32_t AZIMUTH_PULSE_GRACE_MS = 1000;
 // Used for move timeout estimation until a real pulse interval is known.
-constexpr uint32_t AZIMUTH_FALLBACK_PULSE_INTERVAL_MS = 250;
+constexpr uint32_t AZIMUTH_FALLBACK_PULSE_INTERVAL_MS = 300;
 // Extra safety time added to estimated automatic move duration.
 constexpr uint32_t AZIMUTH_MOVE_TIMEOUT_MARGIN_MS = 400;
 // Number of counted pulse edges to stop before the target.
@@ -81,12 +85,9 @@ constexpr uint32_t TARGET_ADJUST_REPEAT_MS = 180;
 constexpr uint32_t PULSE_DEBOUNCE_MS = 5;
 // Short startup grace period after motor start before checking for missing pulses.
 constexpr uint32_t PULSE_STARTUP_GRACE_MS = 240;
-// Minimum no-pulse timeout while the motor is moving.
-constexpr uint32_t PULSE_NO_SIGNAL_TIMEOUT_MS = 240;
-// Extra time added to dynamic pulse timeout calculated from the last interval.
-constexpr uint32_t PULSE_TIMEOUT_MARGIN_MS = 80;
-// Dynamic timeout multiplier based on the last measured pulse interval.
-constexpr uint32_t PULSE_TIMEOUT_INTERVAL_MULTIPLIER = 3;
+// No-pulse timeout while the motor is moving: if no pulse arrives within
+// this window, the move is treated as stuck/broken and stopped.
+constexpr uint32_t PULSE_NO_SIGNAL_TIMEOUT_MS = 300;
 // true: LOW means pulse contact/sensor is active. false: HIGH means active.
 constexpr bool PULSE_ACTIVE_LOW = true;
 // Print every counted pulse interval to Serial for debugging.

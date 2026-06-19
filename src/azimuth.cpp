@@ -25,6 +25,7 @@ bool azimuthMoveActive = false;
 
 int normalizeAzimuth(int value);
 int normalizeAzimuthHalf(int value);
+int clampAzimuthHalf(int value);
 int degreesToHalfDegrees(int degrees);
 int halfDegreesToDegrees(int halfDegrees);
 int shortestHalfDegreeDiff(int fromHalfDegrees, int toHalfDegrees);
@@ -139,6 +140,21 @@ int normalizeAzimuthHalf(int value) {
   return normalized;
 }
 
+// This rotator has a hard mechanical stop at the 0/360 boundary - it cannot
+// physically rotate through it. Real position tracking must clamp there
+// instead of wrapping (e.g. overshoot pulses past 0 must stop at 0, not
+// wrap around to ~359), unlike target/diff math elsewhere which treats the
+// range as a normal 0-359.5 circle.
+int clampAzimuthHalf(int value) {
+  if (value < 0) {
+    return 0;
+  }
+  if (value > 719) {
+    return 719;
+  }
+  return value;
+}
+
 int degreesToHalfDegrees(int degrees) {
   return normalizeAzimuthHalf(normalizeAzimuth(degrees) * 2);
 }
@@ -225,7 +241,7 @@ void adjustAzimuthDegrees(int delta) {
     return;
   }
 
-  realAzimuthHalfDegrees = normalizeAzimuthHalf(realAzimuthHalfDegrees + (delta * 2));
+  realAzimuthHalfDegrees = clampAzimuthHalf(realAzimuthHalfDegrees + (delta * 2));
   azimuthDirty = true;
 }
 
@@ -285,10 +301,10 @@ void azimuthUpdate() {
     lastProcessedPulseCount = pulseCount;
 
     if (lastPulseDirection == CW) {
-      realAzimuthHalfDegrees = normalizeAzimuthHalf(realAzimuthHalfDegrees + static_cast<int>(deltaPulses));
+      realAzimuthHalfDegrees = clampAzimuthHalf(realAzimuthHalfDegrees + static_cast<int>(deltaPulses));
       azimuthDirty = true;
     } else if (lastPulseDirection == CCW) {
-      realAzimuthHalfDegrees = normalizeAzimuthHalf(realAzimuthHalfDegrees - static_cast<int>(deltaPulses));
+      realAzimuthHalfDegrees = clampAzimuthHalf(realAzimuthHalfDegrees - static_cast<int>(deltaPulses));
       azimuthDirty = true;
     }
   }

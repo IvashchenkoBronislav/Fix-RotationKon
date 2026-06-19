@@ -1,7 +1,6 @@
 #include "pulse.h"
 
 #include <Arduino.h>
-#include <algorithm>
 
 #include "azimuth.h"
 #include "config.h"
@@ -72,7 +71,6 @@ void pulseUpdate() {
   const uint32_t nowMs = millis();
   const uint32_t count = getPulseCount();
   const uint32_t lastPulse = getLastPulseMs();
-  const uint32_t lastInterval = getLastPulseIntervalMs();
   const MotorState motorState = getMotorState();
   const bool hadSignalTimeout = signalTimedOut;
 
@@ -111,21 +109,16 @@ void pulseUpdate() {
     return;
   }
 
-  uint32_t signalTimeoutMs = PULSE_NO_SIGNAL_TIMEOUT_MS;
-  if (lastInterval > 0) {
-    signalTimeoutMs =
-        std::max(PULSE_NO_SIGNAL_TIMEOUT_MS,
-                 (lastInterval * PULSE_TIMEOUT_INTERVAL_MULTIPLIER) + PULSE_TIMEOUT_MARGIN_MS);
-  }
   signalTimedOut =
-      (count == 0 && motionStartedMs > 0 && (nowMs - motionStartedMs) >= signalTimeoutMs) ||
-      (count > 0 && (nowMs - lastPulse) > signalTimeoutMs);
+      (count == 0 && motionStartedMs > 0 &&
+       (nowMs - motionStartedMs) >= PULSE_NO_SIGNAL_TIMEOUT_MS) ||
+      (count > 0 && (nowMs - lastPulse) > PULSE_NO_SIGNAL_TIMEOUT_MS);
 
   setErrorState(ERROR_PULSE_NO_SIGNAL, signalTimedOut);
 
   if (signalTimedOut && !hadSignalTimeout) {
     setErrorState(ERROR_AZIMUTH, true);
-    if (isAzimuthMoveActive() && (motorState == CW || motorState == CCW)) {
+    if (motorState == CW || motorState == CCW) {
       handlePulseLossDuringMotion(motorState);
     }
   }
